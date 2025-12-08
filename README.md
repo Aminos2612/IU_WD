@@ -48,7 +48,7 @@ This project was submitted as part of the **Advanced Workbook** assessment. It a
 ---
 
 ## 🧑‍💻 Author
-**Aminos2612**  
+**Mohamed Amine Boughattas**  
 Student at IU International University  
 Course: CSEBCSWAD01 – Web Application Development  
 
