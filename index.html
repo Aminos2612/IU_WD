@@ -119,7 +119,7 @@
     </style>
 </head>
 <body>
-    <h1> Book List Manager</h1>
+    <h1>Book List Manager</h1>
 
     <!-- Table to display books -->
     <table id="bookTable">
@@ -137,14 +137,14 @@
     </table>
 
     <!-- Form to update a book -->
-    <h2> Update Book</h2>
+    <h2>Update Book</h2>
     <form id="updateForm">
         <input type="text" id="updateTitle" placeholder="Existing Book Title" required>
         <input type="text" id="newAuthor" placeholder="New Author">
-        <input type="number" id="newYear" placeholder="New Year">
+        <input type="number" id="newYear" placeholder="New Year" min="0" step="1">
         <input type="text" id="newGenre" placeholder="New Genre">
         <button type="submit">Update Book</button>
-        <div id="updateError" class="error"></div>
+        <div id="updateError" class="error" role="alert"></div>
     </form>
 
     <!-- Form to remove a book -->
@@ -152,7 +152,7 @@
     <form id="removeForm">
         <input type="text" id="removeTitle" placeholder="Title to Remove" required>
         <button type="submit">Remove Book</button>
-        <div id="removeError" class="error"></div>
+        <div id="removeError" class="error" role="alert"></div>
     </form>
 
     <script>
@@ -166,13 +166,15 @@
             const tbody = document.querySelector("#bookTable tbody");
             tbody.innerHTML = "";
             books.forEach(book => {
-                const row = `<tr>
-                    <td data-label="Title">${book.title}</td>
-                    <td data-label="Author">${book.author}</td>
-                    <td data-label="Year">${book.year}</td>
-                    <td data-label="Genre">${book.genre}</td>
-                </tr>`;
-                tbody.innerHTML += row;
+                const row = document.createElement("tr");
+                [["Title", book.title], ["Author", book.author], ["Year", book.year], ["Genre", book.genre]]
+                    .forEach(([label, value]) => {
+                        const cell = document.createElement("td");
+                        cell.dataset.label = label;
+                        cell.textContent = value; // textContent prevents HTML injection
+                        row.appendChild(cell);
+                    });
+                tbody.appendChild(row);
             });
         }
 
@@ -190,13 +192,19 @@
                 errorDiv.textContent = "Book not found.";
                 return;
             }
-            if (!author || !year || !genre || isNaN(year)) {
-                errorDiv.textContent = "Please provide valid inputs.";
+            if (!author && !year && !genre) {
+                errorDiv.textContent = "Please fill in at least one field to update.";
                 return;
             }
-            book.author = author;
-            book.year = parseInt(year);
-            book.genre = genre;
+            const currentYear = new Date().getFullYear();
+            if (year && (!Number.isInteger(Number(year)) || year < 0 || year > currentYear)) {
+                errorDiv.textContent = `Please enter a valid year (0-${currentYear}).`;
+                return;
+            }
+            // Only overwrite the fields the user filled in
+            if (author) book.author = author;
+            if (year) book.year = parseInt(year, 10);
+            if (genre) book.genre = genre;
             displayBooks();
             this.reset();
         });
